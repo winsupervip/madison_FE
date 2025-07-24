@@ -1,0 +1,71 @@
+.loginWrapper {
+  min-height: 100vh;
+  
+ display: flex ;
+   align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  background: #fff;
+}
+
+
+
+
+.formCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px 32px 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.helloTitle {
+  margin-bottom: 0;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+
+.loginForm {
+  width: 100%;
+}
+
+.formItem {
+  margin-bottom: 20px;
+}
+
+.roundInput :global(.ant-input),
+.roundInput :global(.ant-input-password) {
+
+  padding: 10px 16px;
+  font-size: 16px;
+}
+
+.roundButton {
+  border-radius: 32px !important;
+  font-size: 18px;
+  height: 48px;
+  background: #0583f2;
+  border: none;
+}
+
+.roundButton :global(.ant-btn-primary) {
+  background: #0583f2;
+}
+
+.forgotPassword {
+  margin-top: 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.forgotPassword a {
+  color: #0583f2;
+  font-size: 15px;
+  text-decoration: underline;
+}
