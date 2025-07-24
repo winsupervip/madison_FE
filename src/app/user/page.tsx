@@ -1,6 +1,8 @@
 "use client";
 
+import {Modal} from "antd";
 import {isNil} from "nest-crud-client";
+import {useRouter} from "next/navigation";
 import React, {useEffect, useState} from "react";
 import {toastService} from "../../services/Toast.service";
 
@@ -10,17 +12,37 @@ function getCookie(name: string): string {
 }
 
 export default function UserPage() {
+  const statusOptions = [
+    {value: "Pending", label: "Chờ xử lý"},
+    {value: "Inprogress", label: "Đang xử lý"},
+    {value: "Resolved", label: "Đã xong"},
+  ];
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogComplainOpen, setDialogComplainOpen] = useState(false);
   const [user, setUser] = useState({name: "", phone: "", email: ""});
   const [feedback, setFeedback] = useState({title: "", content: ""});
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    const name = getCookie("name");
-    const phone = getCookie("phone");
-    const email = getCookie("email");
-
-    setUser({name, phone, email});
-  }, []);
+  const [complains, setComplains] = useState([
+    {
+      id: "",
+      title: "",
+      description: "",
+      status: "",
+      createDate: "",
+      updateDate: "",
+      attachment: "",
+    },
+  ]);
+  const [selectedComplain, setSelectedComplain] = useState({
+    id: "",
+    title: "",
+    description: "",
+    status: "",
+  });
+  const router = useRouter();
+  const getStatusLabel = (value: string): string => {
+    const found = statusOptions.find((opt) => opt.value === value);
+    return found?.label || value;
+  };
 
   const handleFeedbackChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -28,8 +50,24 @@ export default function UserPage() {
     setFeedback({...feedback, [e.target.name]: e.target.value});
   };
 
-  const handleOpenDialog = () => setDialogOpen(true);
-  const handleCloseDialog = () => setDialogOpen(false);
+  const handleOpenComplainDialog = (
+    id: string,
+    title: string,
+    description: string,
+    status: string
+  ) => {
+    setSelectedComplain({id, title, description, status});
+    setDialogComplainOpen(true);
+  };
+
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+    setFeedback({title: "", content: ""});
+  };
+  const handleCloseDialog = () => {
+    fetchData();
+    setDialogOpen(false);
+  };
   const handleConfirm = async () => {
     try {
       if (!feedback.title.trim() || !feedback.content.trim()) {
@@ -38,7 +76,7 @@ export default function UserPage() {
         );
         return;
       }
-      setLoading(true);
+
       const userId = getCookie("id");
       if (!userId) {
         toastService.error("Không xác định được tài khoản người dùng!");
@@ -73,11 +111,57 @@ export default function UserPage() {
       toastService.error(
         (err as Error).message || "Đã có lỗi xảy ra khi gửi phản hồi."
       );
-    } finally {
-      setLoading(false);
     }
   };
 
+  const verifyRole = async () => {
+    const accessToken = getCookie("accessToken");
+    const res = await fetch("http://127.0.0.1:3000/rest/user/isAccess", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await res.json();
+    if (data.user.role !== "user") {
+      router.push("/user/auth/login");
+    }
+  };
+  const fetchData = async () => {
+    const name = getCookie("name");
+    const phone = getCookie("phone");
+    const email = getCookie("email");
+    const userId = getCookie("id");
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:3000/rest/complains?filter=userId||$eq||${userId}`
+      );
+      if (!res.ok) throw new Error("Không thể tải dữ liệu phản hồi");
+
+      const data = await res.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transformedData = data.map((item: any) => ({
+        id: item.id,
+
+        title: item.title,
+        description: item.description,
+        status: item.status,
+        createDate: item.createDate,
+        updateDate: item.updateDate,
+        attachment: item.attachment_url ?? "",
+      }));
+
+      setComplains(transformedData);
+      console.log("Dữ liệu phản hồi:", complains);
+    } catch (err: unknown) {
+      console.error("Lỗi khi mở phản hồi:", err);
+      toastService.error("Lỗi", (err as Error).message);
+    }
+    setUser({name, phone, email});
+  };
+  useEffect(() => {
+    fetchData();
+    verifyRole();
+  }, []);
   return (
     <main
       style={{
@@ -195,6 +279,115 @@ export default function UserPage() {
           </button>
         </div>
       </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "20px",
+          padding: "20px",
+        }}
+      >
+        {complains.map((complain) => (
+          <div
+            key={complain.id}
+            style={{
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              padding: "16px",
+              backgroundColor: "#f9f9f9",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+
+              transition: "border-color 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "#bbb";
+              e.currentTarget.style.borderWidth = "2px";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "#ddd";
+              e.currentTarget.style.borderWidth = "1px";
+            }}
+            onClick={() =>
+              handleOpenComplainDialog(
+                complain.id,
+                complain.title,
+                complain.description,
+                complain.status
+              )
+            }
+          >
+            <div style={{marginBottom: "12px"}}>
+              <h1 style={{fontWeight: "bold", fontSize: 25}}>
+                {complain.title}
+              </h1>
+              <h2 style={{fontWeight: "bold", fontSize: 17, paddingTop: 10}}>
+                Nội dung
+              </h2>
+              <p
+                style={{
+                  paddingTop: 5,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: "300px",
+                }}
+              >
+                {complain.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {dialogComplainOpen && (
+        <Modal
+          title={
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <h2 style={{fontSize: 22, margin: 0}}>
+                {selectedComplain.title}
+              </h2>
+              <span
+                style={{
+                  background: "#e0f0ff",
+                  color: "#1976d2",
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  fontSize: 14,
+                  fontWeight: 500,
+                }}
+              >
+                {getStatusLabel(selectedComplain.status)}
+              </span>
+            </div>
+          }
+          open={dialogComplainOpen}
+          onCancel={() => setDialogComplainOpen(false)}
+          footer={null}
+        >
+          <div style={{marginBottom: "12px"}}>
+            <h2 style={{fontWeight: "bold", fontSize: 17, paddingTop: 10}}>
+              Nội dung
+            </h2>
+            <p
+              style={{
+                paddingTop: 5,
+                whiteSpace: "normal",
+                maxWidth: 500,
+              }}
+            >
+              {selectedComplain.description}
+            </p>
+          </div>
+        </Modal>
+      )}
       {dialogOpen && (
         <div
           style={{

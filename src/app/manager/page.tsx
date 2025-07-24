@@ -1,6 +1,6 @@
 "use client";
 
-import {Button, Select} from "antd";
+import {Button, Modal, Select} from "antd";
 import {isNil} from "nest-crud-client";
 import {useRouter} from "next/navigation";
 import {useEffect, useRef, useState} from "react";
@@ -27,7 +27,6 @@ export default function ManagerPage() {
     email: "",
     userId: "",
   });
-  const [feedback, setFeedback] = useState({title: "", content: ""});
   const [complains, setComplains] = useState([
     {
       id: "",
@@ -192,8 +191,8 @@ export default function ManagerPage() {
       },
     });
     const data = await res.json();
-    if (data.role !== "manager") {
-      router.push("/user/auth/login");
+    if (data.user.role !== "manager") {
+      router.push("/manager/auth/login");
     }
   };
 
@@ -365,108 +364,72 @@ export default function ManagerPage() {
           </div>
         ))}
         {dialogOpen && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              background: "rgba(0,0,0,0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1000,
-            }}
+          <Modal
+            title={
+              <h2 style={{fontSize: 22, margin: 0}}>
+                {selectedComplain.title}
+              </h2>
+            }
+            open={dialogOpen}
+            onCancel={handleCloseDialog}
+            footer={null}
           >
-            <div
-              style={{
-                background: "#fff",
-                padding: 28,
-                borderRadius: 14,
-                minWidth: 320,
-                maxWidth: 500,
-                boxShadow: "0 4px 32px rgba(0,0,0,0.12)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 16,
-              }}
-            >
-              <div style={{marginBottom: "12px"}}>
-                <h1 style={{fontWeight: "bold", fontSize: 25}}>
-                  {selectedComplain.title}
-                </h1>
-                <h2 style={{fontWeight: "bold", fontSize: 17, paddingTop: 10}}>
-                  Nội dung
-                </h2>
-                <p
-                  style={{
-                    paddingTop: 5,
-                    whiteSpace: "normal",
-                    maxWidth: 500,
-                  }}
-                >
-                  {selectedComplain.description}
-                </p>
-              </div>
-              {dialogNoteOpen && (
-                <input
-                  name="note"
-                  placeholder="Ghi chú"
-                  value={selectedComplain.note}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    handleAddNoteChange(
-                      value,
-                      selectedComplain.id,
-                      user.userId
-                    );
-                  }}
-                  style={{
-                    padding: 12,
-                    borderRadius: 8,
-                    border: "1px solid #ddd",
-                    backgroundColor: "#f0f0f0",
-                    color: "#666",
-                  }}
-                />
-              )}
-              <div
+            <div style={{marginBottom: "12px"}}>
+              <h2 style={{fontWeight: "bold", fontSize: 17, paddingTop: 10}}>
+                Nội dung
+              </h2>
+              <p
                 style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: 8,
-                  marginTop: 8,
+                  paddingTop: 5,
+                  whiteSpace: "normal",
+                  maxWidth: 500,
                 }}
               >
-                <Button
-                  onClick={handleCloseDialog}
-                  style={{
-                    padding: "8px 18px",
-                    borderRadius: 7,
-                    border: "1px solid #bbb",
-                    background: "#f5f5f5",
-                    color: "#333",
-                    cursor: "pointer",
-                  }}
-                >
-                  huỷ
-                </Button>
-                <Button type="default" onClick={handleOpenNoteDialog}>
-                  Thêm ghi chú
-                </Button>
-                <Select
-                  style={{width: 150}}
-                  value={selectedComplain.status}
-                  placeholder="Chọn trạng thái"
-                  onChange={(value) => {
-                    handleChangeStatus(selectedComplain.id, value);
-                  }}
-                  options={statusOptions}
-                />
-              </div>
+                {selectedComplain.description}
+              </p>
             </div>
-          </div>
+            {dialogNoteOpen && (
+              <input
+                name="note"
+                placeholder="Ghi chú"
+                value={selectedComplain.note}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleAddNoteChange(value, selectedComplain.id, user.userId);
+                }}
+                style={{
+                  width: "100%",
+                  padding: 12,
+
+                  borderRadius: 8,
+                  border: "1px solid #ddd",
+                  backgroundColor: "#f0f0f0",
+                  color: "#666",
+                }}
+              />
+            )}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 8,
+                marginTop: 16,
+              }}
+            >
+              <Button type="default" onClick={handleOpenNoteDialog}>
+                Thêm ghi chú
+              </Button>
+              <Select
+                style={{width: 150}}
+                value={selectedComplain.status}
+                placeholder="Chọn trạng thái"
+                onChange={(value) => {
+                  handleChangeStatus(selectedComplain.id, value);
+                }}
+                options={statusOptions}
+              />
+            </div>
+          </Modal>
         )}
       </div>
     </main>
