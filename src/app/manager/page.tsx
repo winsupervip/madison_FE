@@ -1,12 +1,25 @@
 "use client";
 
-import React, {useState} from "react";
+import {isNil} from "nest-crud-client";
+import React, {useEffect, useState} from "react";
+import {toastService} from "../../services/Toast.service";
 
+function getCookie(name: string): string {
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? decodeURIComponent(match[2]) : "";
+}
 export default function ManagerPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [user, setUser] = useState({name: "", phone: "", email: ""});
   const [feedback, setFeedback] = useState({title: "", content: ""});
+  const [complains, setComplains] = useState([]);
+  useEffect(() => {
+    const name = getCookie("name");
+    const phone = getCookie("phone");
+    const email = getCookie("email");
 
+    setUser({name, phone, email});
+  }, []);
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({...user, [e.target.name]: e.target.value});
   };
@@ -17,7 +30,22 @@ export default function ManagerPage() {
     setFeedback({...feedback, [e.target.name]: e.target.value});
   };
 
-  const handleOpenDialog = () => setDialogOpen(true);
+  const handleOpenDialog = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:3000/rest/complains`);
+      if (!res.ok) throw new Error("Không thể tải dữ liệu phản hồi");
+
+      const data = await res.json();
+      setComplains(data);
+      console.log("Dữ liệu phản hồi:", complains);
+
+      setDialogOpen(true); // mở dialog sau khi lấy dữ liệu thành công
+    } catch (err: unknown) {
+      console.error("Lỗi khi mở phản hồi:", err);
+      toastService.error("Lỗi", (err as Error).message);
+    }
+  };
+
   const handleCloseDialog = () => setDialogOpen(false);
   const handleConfirm = () => {
     // Handle feedback submission logic here
@@ -48,30 +76,84 @@ export default function ManagerPage() {
         }}
       >
         <h2 style={{textAlign: "center", marginBottom: 24}}>
-          Thông tin người dùng
+          Thông tin quản lý
         </h2>
         <div style={{display: "flex", flexDirection: "column", gap: 16}}>
-          <input
-            name="name"
-            placeholder="Tên"
-            value={user.name}
-            onChange={handleUserChange}
-            style={{padding: 12, borderRadius: 8, border: "1px solid #ddd"}}
-          />
-          <input
-            name="phone"
-            placeholder="Số điện thoại"
-            value={user.phone}
-            onChange={handleUserChange}
-            style={{padding: 12, borderRadius: 8, border: "1px solid #ddd"}}
-          />
-          <input
-            name="email"
-            placeholder="Email"
-            value={user.email}
-            onChange={handleUserChange}
-            style={{padding: 12, borderRadius: 8, border: "1px solid #ddd"}}
-          />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <label>Tên:</label>
+            <input
+              name="name"
+              placeholder="Tên"
+              value={user.name}
+              onChange={handleUserChange}
+              readOnly
+              disabled={true}
+              style={{
+                padding: 12,
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                backgroundColor: "#f0f0f0",
+                color: "#666",
+                cursor: "not-allowed",
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <label>Số điện thoại:</label>
+            <input
+              name="phone"
+              placeholder="Số điện thoại"
+              value={user.phone}
+              onChange={handleUserChange}
+              readOnly
+              disabled={true}
+              style={{
+                padding: 12,
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                backgroundColor: "#f0f0f0",
+                color: "#666",
+                cursor: "not-allowed",
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <label>Email:</label>
+            <input
+              name="email"
+              placeholder="Email"
+              value={isNil(user.email) ? user.email : ""}
+              onChange={handleUserChange}
+              readOnly
+              disabled={true}
+              style={{
+                padding: 12,
+                borderRadius: 8,
+                border: "1px solid #ddd",
+                backgroundColor: "#f0f0f0",
+                color: "#666",
+                cursor: "not-allowed",
+              }}
+            />
+          </div>
           <button
             onClick={handleOpenDialog}
             style={{
@@ -87,7 +169,7 @@ export default function ManagerPage() {
               transition: "background 0.2s",
             }}
           >
-            tạo ý kiến
+            Danh sách ý kiến
           </button>
         </div>
       </div>
@@ -118,7 +200,7 @@ export default function ManagerPage() {
               gap: 16,
             }}
           >
-            <h3 style={{marginBottom: 8}}>Tạo ý kiến</h3>
+            <h3 style={{marginBottom: 8}}>Danh sách ý kiến</h3>
             <input
               name="title"
               placeholder="Tiêu đề"

@@ -15,13 +15,13 @@ export default function Register({title, type}: {title: string; type: string}) {
   const onFinish = async (values: {
     confirm: string;
     password: string;
-    sdt: string;
+    phone: string;
     email: string;
     username: string;
     name: string;
   }) => {
     try {
-      let apiCreate = `http://localhost:3000/rest/${type}/`;
+      let apiCreate = `http://127.0.0.1:3000/rest/${type}/`;
       switch (type) {
         case "user":
           apiCreate += "createUser";
@@ -42,7 +42,7 @@ export default function Register({title, type}: {title: string; type: string}) {
           username: values.username,
           name: values.name,
           email: values.email,
-          sdt: values.sdt,
+          phone: values.phone,
           password: values.password,
         }),
       });
@@ -99,10 +99,7 @@ export default function Register({title, type}: {title: string; type: string}) {
             name="email"
             label="Email"
             className={styles.formItem}
-            rules={[
-              {required: true, message: "Vui lòng nhập email!"},
-              {type: "email", message: "Email không hợp lệ!"},
-            ]}
+            rules={[{type: "email", message: "Email không hợp lệ!"}]}
           >
             <Input
               prefix={<MailOutlined />}
@@ -111,7 +108,7 @@ export default function Register({title, type}: {title: string; type: string}) {
             />
           </Form.Item>
           <Form.Item
-            name="sdt"
+            name="phone"
             label="Số điện thoại"
             className={styles.formItem}
             rules={[

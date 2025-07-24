@@ -8,7 +8,7 @@ export default function Login({title, type}: {title: string; type: string}) {
   const router = useRouter();
   const onFinish = async (values: {password: string; username: string}) => {
     try {
-      const apiLogin = `http://localhost:3000/rest/${type}/login`;
+      const apiLogin = `http://127.0.0.1:3000/rest/${type}/login`;
       const res = await fetch(apiLogin, {
         method: "POST",
         headers: {
@@ -19,17 +19,29 @@ export default function Login({title, type}: {title: string; type: string}) {
           password: values.password,
         }),
       });
+
       if (!res.ok) throw new Error("Đăng nhập thất bại");
       const data = await res.json();
-      // Lưu token và user vào cookie (giả sử data có { token, user })
-      document.cookie = `token=${data.token}; path=/;`;
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(data.user))}; path=/;`;
+
+      const userFields = {
+        accessToken: data.accessToken,
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        id: data.id,
+      };
+
+      for (const [key, value] of Object.entries(userFields)) {
+        document.cookie = `${key}=${encodeURIComponent(value)}; path=/;`;
+      }
+
       message.success("Đăng nhập thành công!");
       setTimeout(() => {
         router.push(`/${type}`);
       }, 1200);
     } catch (err: unknown) {
       message.error((err as Error).message || "Đã có lỗi xảy ra!");
+      throw new Error("Đăng nhập thất bại");
     }
   };
 
