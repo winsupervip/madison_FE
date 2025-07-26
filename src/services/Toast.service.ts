@@ -1,35 +1,42 @@
-import { notification } from "antd";
+import {notification} from "antd";
+
+type ToastType = "success" | "error" | "warning";
+
+interface ToastOptions {
+  title: string;
+  description?: string;
+  duration?: number | null;
+}
+
+const bgColorMap: Record<ToastType, string> = {
+  success: "#E6F8E8",
+  error: "#FFF0F0",
+  warning: "#FFFBE6",
+};
 
 export class ToastService {
-  success(title: string, description?: string, duration?: number | null) {
-    notification.success({
-      key: "noti",
+  private show(type: ToastType, options: ToastOptions) {
+    const {title, description, duration} = options;
+    notification[type]({
+      key: type,
       message: title,
       description,
-      className: "bg-[#E6F8E8]",
-      duration: duration || 1,
+
+      style: {
+        backgroundColor: bgColorMap[type],
+      },
+      duration: typeof duration === "number" ? duration : 1.5,
     });
   }
 
-  error(title: string, description?: string, duration?: number | null) {
-    notification.error({
-      key: "error",
-      message: title,
-      description,
-      className: "bg-[#FFF0F0]",
-      duration: duration || 1,
-    });
-  }
+  success = (title: string, description?: string, duration?: number | null) =>
+    this.show("success", {title, description, duration});
 
-  warning(title: string, description?: string, duration?: number | null) {
-    notification.warning({
-      key: "warning",
-      message: title,
-      description,
-      className: "bg-[#FFFBE6]",
-      duration: duration || 1,
-    });
-  }
+  error = (title: string, description?: string, duration?: number | null) =>
+    this.show("error", {title, description, duration});
+
+  warning = (title: string, description?: string, duration?: number | null) =>
+    this.show("warning", {title, description, duration});
 }
 
 export const toastService = new ToastService();

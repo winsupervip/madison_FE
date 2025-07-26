@@ -27,7 +27,7 @@ export default function Login({title, type}: {title: string; type: string}) {
         accessToken: data.accessToken,
         name: data.name,
         phone: data.phone,
-        email: data.email,
+        email: data.email ?? "",
         id: data.id,
       };
 

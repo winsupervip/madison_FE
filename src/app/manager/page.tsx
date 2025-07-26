@@ -5,11 +5,8 @@ import {isNil} from "nest-crud-client";
 import {useRouter} from "next/navigation";
 import {useEffect, useRef, useState} from "react";
 import {toastService} from "../../services/Toast.service";
+import {getCookie} from "../../utils/getCookies";
 
-function getCookie(name: string): string {
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? decodeURIComponent(match[2]) : "";
-}
 export default function ManagerPage() {
   const statusOptions = [
     {value: "Pending", label: "Chờ xử lý"},
@@ -321,16 +318,15 @@ export default function ManagerPage() {
               flexDirection: "column",
               justifyContent: "space-between",
               boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-
+              boxSizing: "border-box",
+              cursor: "pointer",
               transition: "border-color 0.3s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#bbb";
-              e.currentTarget.style.borderWidth = "2px";
+              e.currentTarget.style.outline = "2px solid #bbb";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#ddd";
-              e.currentTarget.style.borderWidth = "1px";
+              e.currentTarget.style.outline = "none";
             }}
             onClick={() =>
               handleOpenDialog(
