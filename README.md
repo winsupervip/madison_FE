@@ -32,3 +32,5 @@ cd resident_management
 npm install
 npm run dev
 ```
+
+By default, the frontend runs on port 3001
