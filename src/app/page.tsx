@@ -1,5 +1,6 @@
 "use client";
 import {ConfigProvider} from "antd";
+import zhVN from "antd/locale/vi_VN";
 import {useRouter} from "next/navigation";
 import {useEffect} from "react";
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
 
   return (
     <ConfigProvider
+      locale={zhVN}
       theme={{
         token: {
           colorPrimary: "#ce7a58",

@@ -5,7 +5,7 @@ import {
   PhoneOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import {Button, Card, Form, Input, Typography, message} from "antd";
+import {App, Button, Card, Form, Input, Typography} from "antd";
 import {useRouter} from "next/navigation";
 import styles from "./register.module.scss";
 
@@ -47,12 +47,13 @@ export default function Register({title, type}: {title: string; type: string}) {
         }),
       });
       if (!res.ok) throw new Error("Tạo tài khoản thất bại");
-      message.success("Tạo tài khoản thành công!");
+
       setTimeout(() => {
         router.push(`/${type}/auth/login`);
       }, 1200);
     } catch (err) {
-      message.error((err as Error).message || "Đã có lỗi xảy ra!");
+      console.log("Register error:", err);
+      throw new Error("Tạo tài khoản thất bại");
     }
   };
 

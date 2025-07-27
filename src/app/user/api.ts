@@ -32,10 +32,10 @@ export async function checkUserRole(router: ReturnType<typeof useRouter>) {
     const res = await fetch("http://127.0.0.1:3000/rest/user/isAccess", {
       headers: {Authorization: `Bearer ${accessToken}`},
     });
-    const data = await res.json();
 
-    if (data?.user?.role !== "user") {
+    if (!res.ok) {
       router.push("/user/auth/login");
+      throw new Error("Bạn không có quyền truy cập vào trang này");
     }
   } catch (error) {
     console.error("Error checking user role:", error);

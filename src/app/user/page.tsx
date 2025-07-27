@@ -136,7 +136,9 @@ export default function UserPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          maxWidth: "100%",
+          margin: "0 auto",
           gap: "20px",
           padding: "20px",
         }}

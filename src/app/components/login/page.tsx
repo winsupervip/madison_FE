@@ -1,6 +1,6 @@
 "use client";
 import {LockOutlined, UserOutlined} from "@ant-design/icons";
-import {Button, Form, Input, Typography, message} from "antd";
+import {Button, Form, Input, Typography} from "antd";
 import {useRouter} from "next/navigation";
 import styles from "./login.module.scss";
 
@@ -35,12 +35,12 @@ export default function Login({title, type}: {title: string; type: string}) {
         document.cookie = `${key}=${encodeURIComponent(value)}; path=/;`;
       }
 
-      message.success("Đăng nhập thành công!");
       setTimeout(() => {
         router.push(`/${type}`);
       }, 1200);
     } catch (err: unknown) {
-      message.error((err as Error).message || "Đã có lỗi xảy ra!");
+      console.log("Login error:", err);
+
       throw new Error("Đăng nhập thất bại");
     }
   };
